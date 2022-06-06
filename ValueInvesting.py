@@ -200,7 +200,6 @@ class ValueInvesting:
     
     print(self.QVS_dataframe)
   def Process7(self):
-    QVS_dataframe=QVS_dataframe.loc[self.QVS_dataframe['Multiples score']>np.mean(self.QVS_dataframe['Multiples score'])]
 
     price_info = list(self.get_price_data(self.Ticker))
 
@@ -216,8 +215,8 @@ class ValueInvesting:
     portfolio_budget = float(input("How much is your portfolio budget?"))
     portfolio_size = float(portfolio_budget/70)
     portfolio_size
-    for i in QVS_dataframe.index:
+    for i in self.QVS_dataframe.index:
       self.QVS_dataframe.loc[i,'Number of shares to buy'] = portfolio_size/self.Process3QVS_dataframe.loc[i,'price']
 
-    self.QVS_dataframe = QVS_dataframe.sort_index(by=['Multiples score'],ascending=False,inplace=True)
+    self.QVS_dataframe = self.QVS_dataframe.sort_index(by=['Multiples score'],ascending=False,inplace=True)
     print(self.QVS_dataframe)
