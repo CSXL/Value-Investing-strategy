@@ -220,3 +220,4 @@ class ValueInvesting:
 
     self.QVS_dataframe = self.QVS_dataframe.sort_index(by=['Multiples score'],ascending=False,inplace=True)
     print(self.QVS_dataframe)
+   
