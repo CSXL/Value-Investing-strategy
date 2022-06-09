@@ -220,4 +220,13 @@ class ValueInvesting:
 
     self.QVS_dataframe = self.QVS_dataframe.sort_index(by=['Multiples score'],ascending=False,inplace=True)
     print(self.QVS_dataframe)
+  def ValueInvestingProcess(self):
+    self.Process1()
+    self.Process2()
+    self.Process3()
+    self.Process4()
+    self.Process5()
+    self.Process6()
+    self.Process7()
+
    
