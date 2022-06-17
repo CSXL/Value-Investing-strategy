@@ -9,17 +9,15 @@ class ValueInvesting:
     self.Ticker = self.stocks['Ticker']
     self.features_1=[]
     self.key = sk 
-    self.pk = pk
     self.Ticker = list(self.Ticker)
     self.QVS_dataframe_cols = 0
-    self.cloud_API = 0
     self.features = []
     self.symbol_string = 0
   def get_price_data(self,stock_ticker):
     self.data = []
     for i in stock_ticker:
       try:
-        stock_data = Stock(str(i),output_format='pandas',token=self.key).get_quote()
+        stock_data = Stock(str(i),output_format='pandas',token=self.sk).get_quote()
         self.data.append(stock_data['change']+stock_data['previousClose'])
         print(i)
       except:
@@ -42,11 +40,11 @@ class ValueInvesting:
                       'Multiples score'
 ]
     self.QVS_dataframe = pd.DataFrame(columns=self.QVS_dataframe_cols)
-    self.cloud_API = self.pk
 
   def chunk(self,lst,n):
     for i in range(0,len(lst),n):
       yield lst[i:i+n]
+
   def Process2(self):  
     symbol_group = list(self.chunk(self.Ticker,502))
     self.symbol_string = []
@@ -63,7 +61,7 @@ class ValueInvesting:
     for stock in 	self.symbol_string[0].split(","):
       try:
 
-        data = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+        data = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
         price_to_sales = data[stock]['advanced-stats']['priceToSales']
         price_to_book = data[stock]['advanced-stats']['priceToBook']
         price_to_earning = data[stock]['quote']['peRatio']
@@ -93,7 +91,7 @@ class ValueInvesting:
     for values in range(0,len(self.QVS_dataframe['ev-to-gross profit ratio']),1):
       try:
         stocks = self.QVS_dataframe['symbols'][values]
-        data = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stocks)+'&token='+str(self.key)).json()
+        data = requests.get('https://box.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stocks)+'&token='+str(self.key)).json()
         self.QVS_dataframe.loc[values,'ev-to-gross profit ratio'] = (data[stocks]['advanced-stats']['enterpriseValue']/data[stocks]['advanced-stats']['grossProfit'])
         print(stocks)
       except:
@@ -107,7 +105,7 @@ class ValueInvesting:
       try:
         stock = self.QVS_dataframe['symbols'][values]
     #QVS_dataframe.loc[values,'ev-to-EBITDA ratio'] = ev_to_ebitda_array_1[values]
-        data = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+        data = requests.get('https://box.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
         self.QVS_dataframe.loc[values,'ev-to-EBITDA ratio'] = float(data[stock]['advanced-stats']['enterpriseValue']/data[stock]['advanced-stats']['EBITDA'])
       except:
         self.QVS_dataframe.loc[values,'ev-to-EBITDA ratio']  = 0
@@ -124,63 +122,57 @@ class ValueInvesting:
         if data == 0:
           stock = self.QVS_dataframe.loc[index,'symbols']
           print(stock)
-          batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+          batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'ev-to-EBITDA ratio'] = float(batch_api[stock]['advanced-stats']['enterpriseValue']/batch_api[stock]['advanced-stats']['EBITDA'])
           index +=1
       except:
         print(stock,'Unfound data')
-
-  def fill_holes_for_ev_as_numerator(self,df,feature,jsonkey1,jsonkey2,jsonkey3,jsonkey4):
-    while (df.loc[df[feature]==0]):
-      for i in df.index:
-        stock = df.loc[i,'symbols']
-        if(df.loc[i,feature] == 0):
-          try:
-            batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
-            df.loc[i,feature] = batch_api[stock][jsonkey1][jsonkey2]/batch_api[stock][jsonkey3][jsonkey4]
-          except:
-            print('could not do process')
-    nan_df = (df.loc[df[feature]]==0)
-    for i in nan_df.index:
-      stock = nan_df.loc[i,'symbols']
-      if(nan_df.loc[i,feature] == 0):
-        try:
-          batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
-          nan_df.loc[i,feature] = batch_api[stock][jsonkey1][jsonkey2]/batch_api[stock][jsonkey3][jsonkey4]
-        except:
-          print('could not do proces')
-    for i in list(nan_df.index):
-      df.loc[i,feature] = nan_df.loc[i,feature]
-    print(self.QVS_dataframe.columns)
-    
-  def fill_holes(self,df,feature,jsonkey1,jsonkey2):
-    while (df.loc[df[feature]==0]):
-      for i in df.index:
-        stock = df.loc[i,'symbols']
-        if(df.loc[i,feature] == 0):
-          try:
-            batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
-            df.loc[i,feature] = batch_api[stock][jsonkey1][jsonkey2]
-          except:
-            print('could not do process')
-    nan_df = (df.loc[df[feature]]==0)
-    for i in nan_df.index:
-      stock = nan_df.loc[i,'symbols']
-      if(nan_df.loc[i,feature] == 0):
-        try:
-          batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
-          nan_df.loc[i,feature] = batch_api[stock][jsonkey1][jsonkey2]
-        except:
-          print('could not do proces')
-    for i in list(nan_df.index):
-      df.loc[i,feature] = nan_df.loc[i,feature]
-    print(self.QVS_dataframe.columns)
-
+    index = 0
+    for data in self.QVS_dataframe['ev-to-gross profit ratio']:
+      try:
+        if data == 0:
+          stock = self.QVS_dataframe.loc[index,'symbols']
+          print(stock)
+          batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+          self.QVS_dataframe.loc[index,'ev-to-gross profit ratio'] = float(batch_api[stock]['advanced-stats']['enterpriseValue']/batch_api[stock]['advanced-stats']['grossProfit'])
+          index +=1
+      except:
+        print(stock,'Unfound data')
+    index = 0
+    for data in self.QVS_dataframe['price-to-sales ratio']:
+      try:
+        if data == 0:
+          stock = self.QVS_dataframe.loc[index,'symbols']
+          print(stock)
+          batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+          self.QVS_dataframe.loc[index,'price-to-sales ratio'] = float(batch_api[stock]['advanced-stats']['priceToSales'])
+          index +=1
+      except:
+        print(stock,'Unfound data')
+    index = 0
+    for data in self.QVS_dataframe['price-to-earning ratio']:
+      try:
+        if data == 0:
+          stock = self.QVS_dataframe.loc[index,'symbols']
+          print(stock)
+          batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+          self.QVS_dataframe.loc[index,'price-to-sales ratio'] = float(batch_api[stock]['quote']['peRatio'])
+          index +=1
+      except:
+        print(stock,'Unfound data')
+    index = 0
+    for data in self.QVS_dataframe['price-to-book-value ratio']:
+      try:
+        if data == 0:
+          stock = self.QVS_dataframe.loc[index,'price-to-book ratio']
+          print(stock)
+          batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
+          self.QVS_dataframe.loc[index,'prince-to-book-value ratio'] = float(batch_api[stock]['advanced-stats']['priceToBook'])
+          index += 1
+      except:
+        print('unfound data')
   def Process6(self):
-    self.fill_holes(self.QVS_dataframe,'price-to-earning ratio','quote','peRatio')
-    self.fill_holes(self.QVS_dataframe,'price-to-book-value ratio','advanced-stats','priceToBook')
-    self.fill_holes(self.QVS_dataframe,'price-to-sales ratio','advanced-stats','priceToSales')
-    self.fill_holes_for_ev_as_numerator(self.QVS_dataframe,'ev-to-gross profit ratio','advanced-stats','enterpriseValue','advanced-stats','grossProfit')
+
 
     self.features_1 = ["price-to-earning ratio","price-to-book-value ratio","price-to-sales ratio","ev-to-EBITDA ratio","ev-to-gross profit ratio"]
     import scipy
@@ -214,9 +206,9 @@ class ValueInvesting:
 
     portfolio_budget = float(input("How much is your portfolio budget?"))
     portfolio_size = float(portfolio_budget/70)
-    portfolio_size
+    
     for i in self.QVS_dataframe.index:
-      self.QVS_dataframe.loc[i,'Number of shares to buy'] = portfolio_size/self.Process3QVS_dataframe.loc[i,'price']
+      self.QVS_dataframe.loc[i,'Number of shares to buy'] = portfolio_size/self.QVS_dataframe.loc[i,'price']
 
     self.QVS_dataframe = self.QVS_dataframe.sort_index(by=['Multiples score'],ascending=False,inplace=True)
     print(self.QVS_dataframe)
@@ -228,5 +220,3 @@ class ValueInvesting:
     self.Process5()
     self.Process6()
     self.Process7()
-
-   
