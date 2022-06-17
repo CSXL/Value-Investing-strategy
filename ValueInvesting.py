@@ -1,3 +1,4 @@
+
 import pandas as pd
 from iexfinance.stocks import Stock 
 import requests 
@@ -14,14 +15,15 @@ class ValueInvesting:
     self.features = []
     self.symbol_string = 0
   def get_price_data(self,stock_ticker):
-    self.data = []
+    data = []
     for i in stock_ticker:
       try:
-        stock_data = Stock(str(i),output_format='pandas',token=self.sk).get_quote()
-        self.data.append(stock_data['change']+stock_data['previousClose'])
+        stock_data = Stock(str(i),output_format='pandas',token=self.key).get_quote()
+        data.append(stock_data['change']+stock_data['previousClose'])
         print(i)
       except:
-        print('Unfound stock')
+        print('unfound symbol')
+    return list(data)
   def Process1(self):
     self.QVS_dataframe_cols = [
                       'symbols',
