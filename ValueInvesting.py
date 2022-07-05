@@ -126,9 +126,9 @@ class ValueInvesting:
           print(stock)
           batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'ev-to-EBITDA ratio'] = float(batch_api[stock]['advanced-stats']['enterpriseValue']/batch_api[stock]['advanced-stats']['EBITDA'])
-          index +=1
       except:
         print(stock,'Unfound data')
+      index += 1
     index = 0
     for data in self.QVS_dataframe['ev-to-gross profit ratio']:
       try:
@@ -137,9 +137,10 @@ class ValueInvesting:
           print(stock)
           batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'ev-to-gross profit ratio'] = float(batch_api[stock]['advanced-stats']['enterpriseValue']/batch_api[stock]['advanced-stats']['grossProfit'])
-          index +=1
       except:
         print(stock,'Unfound data')
+      index +=1
+
     index = 0
     for data in self.QVS_dataframe['price-to-sales ratio']:
       try:
@@ -148,9 +149,10 @@ class ValueInvesting:
           print(stock)
           batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'price-to-sales ratio'] = float(batch_api[stock]['advanced-stats']['priceToSales'])
-          index +=1
       except:
         print(stock,'Unfound data')
+      index +=1
+
     index = 0
     for data in self.QVS_dataframe['price-to-earning ratio']:
       try:
@@ -159,9 +161,10 @@ class ValueInvesting:
           print(stock)
           batch_api = requests.get('https://cloud.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'price-to-sales ratio'] = float(batch_api[stock]['quote']['peRatio'])
-          index +=1
+          
       except:
         print(stock,'Unfound data')
+      index +=1
     index = 0
     for data in self.QVS_dataframe['price-to-book-value ratio']:
       try:
@@ -170,9 +173,10 @@ class ValueInvesting:
           print(stock)
           batch_api = requests.get('https://sandbox.iexapis.com/stable/stock/market/batch/?types=advanced-stats,stats,quote&symbols='+str(stock)+'&token='+str(self.key)).json()
           self.QVS_dataframe.loc[index,'prince-to-book-value ratio'] = float(batch_api[stock]['advanced-stats']['priceToBook'])
-          index += 1
       except:
         print('unfound data')
+      index += 1
+
   def Process6(self):
 
 
